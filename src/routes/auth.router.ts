@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { body, validationResult } from "express-validator";
 import { getAuth } from "firebase-admin/auth";
 import { db } from "../firebase";
-import { IUser } from "../schema/users.model";
+import { userValidatorRules, validateRegister } from "../middleware";
+import { IUser } from "../models/users.model";
 
 const router = Router();
 const collec = db.collection("users");
@@ -40,21 +40,10 @@ router.post("/login", async (req, res) => {
 
 router.post(
   "/register",
-  body("email").isEmail().withMessage("Invalid email"),
-  body("password").isLength({ min: 6 }).withMessage("Invalid password"),
+  userValidatorRules(),
+  validateRegister,
   async (req, res) => {
     const data: IUser = req.body;
-    const errors: any = validationResult(data);
-
-    if (!errors.isEmpty()) {
-      console.log(errors);
-      const e = errors.errors.map((e) => ({
-        name: e.param,
-        message: e.msg,
-      }));
-
-      return res.status(400).send({ errors: e });
-    }
 
     const exist = await collec.where("username", "==", data.username).get();
 
