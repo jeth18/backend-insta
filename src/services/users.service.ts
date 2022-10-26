@@ -1,23 +1,22 @@
 import { db } from "../firebase";
 import { IUser } from "../models/users.model";
 
+const authRef = db.collection("users");
 export class UserService {
-  private collec = db.collection("users");
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {}
-
-  public getUserByUsername(username: string) {
-    this.collec
+  static getUserByUsername(username: string): Promise<boolean> {
+    return authRef
       .where("username", "==", username)
       .get()
-      .then((res) => {
-        console.log(res);
-        return res;
+      .then((snapshot) => {
+        return !snapshot.empty;
+      })
+      .catch((error) => {
+        console.log("Error => " + error);
+        return true;
       });
   }
 
-  async postData(user: IUser) {
-    return await this.collec.add(user);
+  static async postData(user: IUser) {
+    return await authRef.add(user);
   }
 }

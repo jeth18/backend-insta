@@ -1,31 +1,24 @@
 import { Request, Response } from "express";
-import { getAuth } from "firebase-admin/auth";
 import { IUser } from "../models/users.model";
+import { TokenService } from "../services/token.service";
 import { UserService } from "../services/users.service";
 
 export class AuthController {
-  private userService: UserService;
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   constructor() {}
 
-  saveUser(req: Request, res: Response) {
-    console.log(req.body);
+  async saveUser(req: Request, res: Response) {
     const data: IUser = req.body;
-    console.log(this.userService);
-    this.userService.getUserByUsername(data.username);
-    res.status(200).send("name");
+    const exist = await UserService.getUserByUsername(data.username);
 
-    // //if (exist) return res.status(400).send({ username: "Username exist" });
+    if (exist) return res.status(400).send({ username: "Username exist" });
 
-    // this.userService.postData(data).then((resp) => {
-    //   getAuth()
-    //     .createCustomToken(resp.id)
-    //     .then((customToken) => {
-    //       res.send({ token: customToken, username: data.username });
-    //     })
-    //     .catch((error) => {
-    //       console.log("Error creating custom token:", error);
-    //     });
-    // });
+    const userCreate = await UserService.postData(data);
+
+    const token = await TokenService.createToken(userCreate.id, data.username);
+
+    if (token.error) res.status(400).send(token.error);
+
+    res.send(token);
   }
 }
