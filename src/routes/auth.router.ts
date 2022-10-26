@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { getAuth } from "firebase-admin/auth";
+import { AuthController } from "../controllers/auth.controller";
 import { db } from "../firebase";
 import { userValidatorRules, validateRegister } from "../middleware";
-import { IUser } from "../models/users.model";
 
 const router = Router();
 const collec = db.collection("users");
+const controller = new AuthController();
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -42,25 +43,7 @@ router.post(
   "/register",
   userValidatorRules(),
   validateRegister,
-  async (req, res) => {
-    const data: IUser = req.body;
-
-    const exist = await collec.where("username", "==", data.username).get();
-
-    if (exist.docs[0]?.data())
-      return res.status(400).send({ username: "Username exist" });
-
-    const docRef = await collec.add(data);
-
-    getAuth()
-      .createCustomToken(docRef.id)
-      .then((customToken) => {
-        res.send({ token: customToken, username: data.username });
-      })
-      .catch((error) => {
-        console.log("Error creating custom token:", error);
-      });
-  }
+  controller.saveUser
 );
 
 export const authRouter = router;
