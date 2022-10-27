@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { db } from "../firebase";
-import { IUser } from "../models/users.model";
+import { db } from "../../firebase";
+import { IUser } from "../../models/users.model";
 
 const router = Router();
 

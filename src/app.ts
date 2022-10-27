@@ -1,11 +1,10 @@
 import express from "express";
-import { authRouter, userRouter } from "./routes/index";
+import router from "./routes/routes";
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/", authRouter);
-app.use("/users", userRouter);
+app.use("/api", router);
 
 export default app;
