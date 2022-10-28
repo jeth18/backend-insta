@@ -20,10 +20,9 @@ export class UserService {
     return await authRef.add(user);
   }
 
-  static login(email: string, password: string) {
+  static login(email: string) {
     return authRef
       .where("email", "==", email)
-      .where("password", "==", password)
       .get()
       .then((snapshot) => {
         if (snapshot.empty) return null;

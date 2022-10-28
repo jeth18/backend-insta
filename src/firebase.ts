@@ -6,6 +6,7 @@ dotenv.config();
 
 initializeApp({
   credential: applicationDefault(),
+  storageBucket: process.env.BUCKET_URL,
 });
 
 export const db = getFirestore();

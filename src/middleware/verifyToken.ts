@@ -1,14 +1,25 @@
-import jwt from "jsonwebtoken";
+import { getAuth } from "firebase-admin/auth";
+
 export const verifyToken = (req, res, next) => {
   const token = req.header("Authorization");
   if (!token) return res.status(401).json({ error: "Access denied" });
   try {
-    const decode = jwt.decode(token.split(" ")[1]);
-    const res = jwt.verify(token.split(" ")[1], "secret");
-    console.log(decode, res);
-    next();
+    const decode = token.split(" ")[1];
+    getAuth()
+      .verifyIdToken(decode)
+      .then((decodedToken) => {
+        const uid = decodedToken.uid;
+        req.uid = uid;
+        next();
+      })
+      .catch((error) => {
+        // Handle error
+        console.log("Error => " + error);
+        res.status(401).send({
+          error: "Expired token",
+        });
+      });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ error: "token no es válido" });
+    res.status(400).json({ error: "Invalid token" });
   }
 };
