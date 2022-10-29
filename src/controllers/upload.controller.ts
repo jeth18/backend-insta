@@ -9,12 +9,18 @@ export class UploadController {
 
     const name = saltedMd5(req["file"].originalname, "SUPER-S@LT");
     const fileName = name + path.extname(req["file"].originalname);
+
     await app.locals.bucket
       .file(fileName)
       .createWriteStream()
       .end(req["file"].buffer);
 
+    const filePublic = await app.locals.bucket.file(fileName).makePublic();
+
+    console.log(filePublic);
+
+    res.send("hi");
+
     //TODO RETURN URL DEL ARCHIVO
-    res.status(200).send("Se cargo el archivo correctamente");
   }
 }
